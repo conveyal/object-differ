@@ -1,0 +1,35 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+# Replace Travis's default Maven installation step with a no-op.
+# This avoids redundantly pre-running 'mvn install -DskipTests' every time.
+install: true
+
+# Replace Travis's default build step.
+# Run all Maven phases at once up through verify, install, and deploy.
+script:
+  # only (attempt to) deploy non-pull request commits to the master branch, dev branch, or tags
+  # Otherwise, just run all the way up to verify, the last phase before installing and deploying.
+  # Setting the gpg.skip property avoids signing artifacts when the encryption keys are not available.
+  - |
+    if [[ "$TRAVIS_PULL_REQUEST" = false ]] && [[ "$TRAVIS_BRANCH" = master || "$TRAVIS_BRANCH" = dev || ! -z "$TRAVIS_TAG" ]]; then
+      mvn clean deploy --settings maven-settings.xml
+    else
+      mvn clean verify --settings maven-settings.xml -B -V -Dgpg.skip
+    fi
+
+# If sudo is disabled, CI runs on container based infrastructure (allows caching &c.)
+sudo: false
+
+# Retain the local Maven repository to speed up builds.
+# The Conveyal subdirectory is deleted in the script above to prevent retaining Conveyal snapshot artifacts across builds.
+cache:
+  directories:
+    - "$HOME/.m2/repository"
+
+# Notify us of the build status on the Slack channel
+notifications:
+  slack: conveyal:WQxmWiu8PdmujwLw4ziW72Gc
+
