@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertFalse;
@@ -23,6 +24,24 @@ import static org.junit.Assert.assertTrue;
 public class ObjectDifferTest {
 
     // TODO add tests that the differ can compare objects to themselves
+
+    /** Test for issue #1. */
+    @Test
+    public void testCompareTreeMaps () {
+
+        // First make the two separate but semantically identical tree maps.
+        TreeMap<Integer, Long> o1 = new TreeMap<>();
+        o1.put(1, 2L);
+        o1.put(3, 4L);
+        Map<Integer, Long> o2 = new TreeMap<>();
+        o2.putAll(o1);
+        assertDifferences(false, o1, o2);
+
+        // Now make one of the two tree maps different. Differences should be detected.
+        o2.put(4, 5L);
+        assertDifferences(true, o1, o2);
+
+    }
 
     /**
      * Create two semantically equal object trees that are composed of completely separate instances.
