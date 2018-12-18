@@ -223,13 +223,6 @@ public class ObjectDiffer {
         return value instanceof Number || value instanceof String || value instanceof Boolean || value instanceof Character;
     }
 
-    // A unique instance of Integer that should not be a key in any Object-keyed map.
-    // For maps keyed on primitive numbers, this Integer should unbox and cast to any primitive numeric type.
-    // It should be relatively rare as a key. This serves as a spot check for primitive keyed maps.
-    // Note that Integers created with the constructor are always individual instances
-    // (autoboxed ones in the 8 bit range are cached).
-    private static final Integer DUMMY_KEY = new Integer(-654321);
-
     /**
      * Map _keys_ must define hashcode and equals, and will not be compared beyond their own definition of these. Note
      * that arrays for example do not define deep equals, so will not be properly compared as map keys.
@@ -251,10 +244,11 @@ public class ObjectDiffer {
             breadcrumbs.pop();
         }
         // Finally, check that missing values are represented in the same way in the two maps.
-        Object missingEntryA = a.get(DUMMY_KEY);
-        Object missingEntryB = b.get(DUMMY_KEY);
+        // This is only relevant for primitive-valued maps.
+        Object missingEntryA = a.getNoEntryValue();
+        Object missingEntryB = b.getNoEntryValue();
         if (!Objects.equals(missingEntryA, missingEntryB)) {
-            difference("No-entry value differs between two maps (assuming key %d is not present)", DUMMY_KEY);
+            difference("No-entry value differs between two maps: %s vs. %s", missingEntryA.toString(), missingEntryB.toString());
         }
     }
 

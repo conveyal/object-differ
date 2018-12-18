@@ -37,4 +37,9 @@ class TIntIntMapWrapper extends MapComparisonWrapper {
         return map.size();
     }
 
+    @Override
+    public Object getNoEntryValue () {
+        return map.getNoEntryValue();
+    }
+
 }
