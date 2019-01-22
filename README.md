@@ -1,7 +1,12 @@
-# object-differ
-Library to check that two Java object graphs are identical, for use in serialization round-trip tests.
+# kryo-tools
 
-This project is a small library that performs a semantic equality check between two object graphs in Java. This is intended for use in testing that a round trip through serialization and deserialization reproduces an identical transportation network representation, and that the processs of building that transportation network is reproducible. A system that can do a generalized semantic comparison of any tree of objects is quite complex. Here we try to implement only the minimum feature set needed for our use case in serialization tests.
+These are shared classes enabling Kryo serialization in a couple of projects: OTP and R5.
+
+In package com.conveyal.kryo.serializers we define some custom serializers which are reused in both projects. This introduces transitive dependencies on Trove and Kryo itself.
+
+The package com.conveyal.object_differ contains library classes that check whether two Java object graphs are identical, for use in serialization round-trip tests. This diffing functionality is actually independent of Kryo and should remain so, but we only use it in serialization tests so it's bundled here with Kryo serializers in a single module.
+
+This performs a semantic equality check between two object graphs in Java. This is intended for use in testing that a round trip through serialization and deserialization reproduces an identical transportation network representation, and that the processs of building that transportation network is reproducible. A system that can do a generalized semantic comparison of any tree of objects is quite complex. Here we try to implement only the minimum feature set needed for our use case in serialization tests.
 
 This code used to be embedded in the R5 project but is now a separate Maven / Git project so that it can be reused in
 multiple projects, including R5 and OpenTripPlanner.
