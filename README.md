@@ -19,10 +19,12 @@ To use it in a Maven project include the following dependency:
 ```XML
         <dependency>
             <groupId>com.conveyal</groupId>
-            <artifactId>object-differ</artifactId>
-            <version>1.0.0</version>
+            <artifactId>kryo-tools</artifactId>
+            <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
 ```
+
+This project was renamed from object-differ when serializers were added, so artifacts with versions 1.0 and 1.1 exist with that name.
 
 TODO: configuration and usage information, testing on complex objects within OTP.
