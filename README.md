@@ -2,7 +2,7 @@
 
 These are shared classes enabling Kryo serialization in a couple of projects: OTP and R5.
 
-In package com.conveyal.kryo.serializers we define some custom serializers which are reused in both projects. This introduces transitive dependencies on Trove and Kryo itself.
+In package com.conveyal.kryo we define some custom serializers which are reused in both projects. This introduces transitive dependencies on Trove, Guava, and Kryo itself.
 
 The package com.conveyal.object_differ contains library classes that check whether two Java object graphs are identical, for use in serialization round-trip tests. This diffing functionality is actually independent of Kryo and should remain so, but we only use it in serialization tests so it's bundled here with Kryo serializers in a single module.
 
