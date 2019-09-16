@@ -28,3 +28,13 @@ To use it in a Maven project include the following dependency:
 This project was renamed from object-differ when serializers were added, so artifacts with versions 1.0 and 1.1 exist with that name.
 
 TODO: configuration and usage information, testing on complex objects within OTP.
+
+## Using object-differ with Java 11+ Modules
+
+The object differ works by reflection, which is by default not allowed under the Java module system. Applications 
+depending on the kryo-tools object differ will not work without some adjustments. Rather than simply opening large
+amounts of classes to reflection all the time, a more targeted solution is to add exceptions only when running your
+tests (since object-differ is only really intended for testing and not needed during normal program execution). See
+this article:
+
+https://sormuras.github.io/blog/2018-09-11-testing-in-the-modular-world.html#white-box-modular-testing-with-extra-java-command-line-options
