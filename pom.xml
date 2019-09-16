@@ -60,8 +60,22 @@
                 <version>3.8.1</version>
                 <configuration>
                     <!-- use Java 11 -->
-                    <source>11</source>
-                    <target>11</target>
+                    <release>11</release>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <!-- For Java 11 Modules, specify a module name. Do not create module-info.java until all
+                                 our dependencies specify a module name. -->
+                            <Automatic-Module-Name>com.conveyal.kryo_tools</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
 
