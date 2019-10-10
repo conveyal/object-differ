@@ -53,14 +53,16 @@ public class ObjectDiffer {
      */
     Set<Object> alreadySeen = Sets.newIdentityHashSet();
 
-    protected Set<String> ignoreFields = Sets.newHashSet();
+    private Set<String> ignoreFields = new HashSet<>();
 
-    protected Set<Class> ignoreClasses = Sets.newHashSet();
+    private Set<Class> ignoreClasses = new HashSet<>();
 
-    protected Set<Class> useEquals = Sets.newHashSet();
+    private Set<Class> useEquals = new HashSet<>();
+
+    private Map<String, KeyExtractor> keyExtractors = new HashMap();
 
     /** Count all differences seen during the comparison. */
-    int nDifferences = 0;
+    private int nDifferences = 0;
 
     private int nObjectsCompared = 0;
 
@@ -80,8 +82,8 @@ public class ObjectDiffer {
     /**
      * Tell the Differ to completely skip fields marked transient. The differ will not see any changes introduced when
      * reconstructing these fields after loading. This is useful though if the transient fields are not reconstructed,
-     * or look very different after reconstruction. NOTE this will completely skip over the values in some external
-     * library classes like TIntIntMap
+     * or look very different after reconstruction. NOTE: this will completely skip over the values in some external
+     * library classes like TIntIntMap.
      */
     public void skipTransientFields() {
         skipTransientFields = true;
@@ -109,6 +111,16 @@ public class ObjectDiffer {
      */
     public void useEquals(Class... classes) {
         useEquals.addAll(Arrays.asList(classes));
+    }
+
+    /**
+     * Configure the comparison of two copies of a map originally designed to use identity equality on the keys.
+     * Ideally the first parameter would be a Class and would apply to any Map with that Class as a key, but type
+     * information about Maps is not known at runtime.
+     * See {@link com.conveyal.object_differ.KeyExtractor#extractKey(java.lang.Object)}
+     */
+    public <T> void setKeyExtractor(String fieldName, KeyExtractor<T, ?> keyExtractor) {
+        keyExtractors.put(fieldName, keyExtractor);
     }
 
     /**
@@ -209,6 +221,11 @@ public class ObjectDiffer {
                 field.setAccessible(true);
                 Object valueA = field.get(a);
                 Object valueB = field.get(b);
+                KeyExtractor keyExtractor = keyExtractors.get(field.getName());
+                if (keyExtractor != null) {
+                    valueA = extractKeys(valueA, keyExtractor);
+                    valueB = extractKeys(valueB, keyExtractor);
+                }
                 compareTwoObjects(valueA, valueB);
             } catch (IllegalAccessException | IllegalArgumentException | InaccessibleObjectException e) {
                 throw new RuntimeException(e);
@@ -238,6 +255,7 @@ public class ObjectDiffer {
             if (b.containsKey(aKey)) {
                 Object aValue = a.get(aKey);
                 Object bValue = b.get(aKey);
+                // compareTwoObjects(aKey, bKey); // this is a bit hard to pull off
                 compareTwoObjects(aValue, bValue);
             } else {
                 difference("Map B does not contain key from map A: %s", aKey.toString());
@@ -251,6 +269,17 @@ public class ObjectDiffer {
         if (!Objects.equals(missingEntryA, missingEntryB)) {
             difference("No-entry value differs between two maps: %s vs. %s", missingEntryA.toString(), missingEntryB.toString());
         }
+    }
+
+    private Object extractKeys (Object object, KeyExtractor keyExtractor) {
+        if (! (object instanceof Map)) return object;
+        Map originalMap = ((Map) object);
+        Map replacementMap = new HashMap();
+        originalMap.forEach((key, value) -> {
+            Object replacementKey = keyExtractor.extractKey(key);
+            replacementMap.put(replacementKey, value);
+        });
+        return replacementMap;
     }
 
     /**
